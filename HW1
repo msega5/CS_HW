@@ -1,0 +1,44 @@
+using System.Drawing;
+using System;
+
+//Написать программу-калькулятор,
+//вычисляющую выражения вида a + b, a - b, a / b, a * b,
+//введенные из командной строки, и выводящую результат выполнения на экран.
+
+namespace Calc
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            if (args.Length == 3)
+            {
+                int result = 0;
+                int num1 = int.Parse(args[0]);
+                string sign = args[1];
+                int num2 = int.Parse(args[2]);
+                if (sign == "+")
+                {
+                    result = num1 + num2;
+                }
+                if (sign == "-")
+                {
+                    result = num1 - num2;
+                }
+                if (sign == "/")
+                {
+                    result = num1 / num2;
+                }
+                if (sign == "*")
+                {
+                    result = num1 * num2;
+                }
+                Console.WriteLine($"{num1} {sign} {num2} = {result}");
+            }
+            else
+            {
+                Console.WriteLine("Попробуй ещё");
+            }
+        }
+    }
+}
