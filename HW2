@@ -1,0 +1,41 @@
+// Дан двумерный массив 732 496 185
+// Отсортировать данные в по возрастанию 123 456 789
+// Вывести результат на печать.
+//
+// class Program { static void Main(string[] args)
+// { int[,] a = { { 7, 3, 2 }, { 4, 9, 6 }, { 1, 8, 5 } }; } }
+
+namespace HW2
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            int[,] a = { { 7, 3, 2 }, { 4, 9, 6 }, { 1, 8, 5 } };
+            int[] newArray = new int[a.GetLength(0) * a.GetLength(1)];
+            int k = 0;
+            for (int i = 0; i < a.GetLength(0); i++)
+            {
+                for (int j = 0; j < a.GetLength(1); j++)
+                {
+                    newArray[k] = a[i, j];
+                    k++;
+                }
+            }
+            Array.Sort(newArray);
+            //foreach (var item in newArray)
+            //    Console.Write(item + " ");
+            k = 0;
+            for (int i = 0; i < a.GetLength(0); i++)
+            {
+                for (int j = 0; j < a.GetLength(1); j++)
+                {
+                    a[i, j] = newArray[k];
+                    k++;
+                    Console.Write(a[i, j] + "");
+                }
+                Console.WriteLine();
+            }
+        }
+    }
+}
