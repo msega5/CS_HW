@@ -1,1 +1,41 @@
 Габиль, пожалуйста, пока не оценивайте. Добавлю задание вечером
+using System;
+using System.Collections.Generic;
+
+namespace HW6
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            //Дан массив и число. Найдите три числа в массиве сумма которых равна искомому числу.
+            //Подсказка: если взять первое число в массиве,
+            //можно ли найти в оставшейся его части два числа равных по сумме первому.
+
+            int[] arr = new int[] { 2, 4, 6, 1, 2, 3, 4, 5, 7, 8, 9, 12, 0 };
+            int target = 12;
+            HashSet<int> set = new HashSet<int>();
+            int[] set2 = new int[15];
+            HashSet<int> set3 = new HashSet<int>();
+            foreach (var i in arr)
+            {
+                if (set.Contains(target - i))
+                {
+                    Console.WriteLine(($"Числа = {target - i}, {i}"));
+                    return;
+                }
+                else
+                {
+                    set.Add(i);
+                }
+
+                set2 = set.ToArray();
+
+                //Достать массив и найти в новом массиве число, которое составляет первое слагаемое искомого target
+            }
+
+            Console.WriteLine("Числа не найдены");
+            Console.ReadLine();
+        }
+    }
+}
