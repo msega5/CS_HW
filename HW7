@@ -1,1 +1,124 @@
-Здесь пока ничего нет
+Program.cs
+using System;
+
+namespace HW7
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            
+            var calc = new Calc();
+            calc.MyEventHandler += Calc_MyEventHandler;
+
+            
+            int[] array = new int[2];
+            Console.WriteLine("Введите два числа: ");
+            for (int i = 0; i < 2; i++)
+            {
+                array[i] = Int32.Parse(Console.ReadLine()); ;
+                Console.WriteLine($"{i + 1}е число  = {array[i]}");
+            }
+            Console.WriteLine("Введите номер операции: \n1 - сложение \n2 вычитание \n3 - деление \n4 - умножение \n5 - отмена/выход");
+            bool flag = true;
+            while (flag == true)
+            {
+                switch (Console.Read())
+                {
+                    case 1:
+                        calc.Sum(array[0], array[1]);
+                        break;
+                    case 2:
+                        calc.Sub(array[0], array[1]);
+                        break;
+                    case 3:
+                        calc.Multy(array[0], array[1]);
+                        break;
+                    case 4:
+                        calc.Divide(array[0], array[1]);
+                        break;
+                    case 5:
+                        calc.Cancel();
+                        break;
+                }
+                if (flag == false)
+                    break;
+            }
+        }
+
+        //Для калькулятора
+        private static void Calc_MyEventHandler(object? sender, EventArgs e)
+        {
+            if (sender is Calc)
+                Console.WriteLine(((Calc)sender).Result);
+        }
+
+       
+    }
+}
+
+
+
+
+
+
+
+Calc.cs
+using System;
+namespace HW7;
+
+internal class Calc : Icalc
+{
+    public double Result { get; set; } = 0D;
+
+    public event EventHandler<EventArgs> MyEventHandler;
+    private void PrintResult()
+    {
+        MyEventHandler?.Invoke(this, new EventArgs());
+    }
+    public void Sum(int x, int y)
+    {
+        Result = x + y;
+        PrintResult();
+    }
+    public void Divide(int x, int y)
+    {
+        Result = x / y;
+        PrintResult();
+    }
+    public void Multy(int x, int y)
+    {
+        Result = x * y;
+        PrintResult();
+    }
+    public void Sub(int x, int y)
+    {
+        Result = x - y;
+        PrintResult();
+    }
+ 
+    public void Cancel()
+    {
+        bool flag = false;
+    }
+}
+
+
+
+
+
+
+Icalc.cs
+using System;
+namespace HW7;
+public interface Icalc
+{
+    double Result { get; set; }
+    void Sum(int x, int y);
+    void Sub(int x, int y);
+    void Multy(int x, int y);
+    void Divide(int x, int y);
+    void Cancel();
+
+    event EventHandler<EventArgs> MyEventHandler;
+}
