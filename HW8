@@ -1,0 +1,200 @@
+Program.cs
+using System;
+
+namespace HW8
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+
+            var calc = new Calc();
+            calc.MyEventHandler += Calc_MyEventHandler;
+
+
+            int[] array = new int[2];
+            Console.Write("Введите первое число: ");
+            var num1 = Double.Parse(Console.ReadLine());
+            Console.Write("Введите второе число: ");
+            var num2 = Double.Parse(Console.ReadLine());
+            
+            Console.WriteLine("Введите номер операции: \n1 - сложение \n2 - вычитание \n3 - умножение \n4 - целочисленное деление \nпробел - отмена/выход");
+            bool flag = true;
+            while (flag == true)
+            {
+                switch (Console.ReadLine())
+                {
+                    case "1":
+                        calc.Sum(num1, num2);
+                        break;
+                    case "2":
+                        calc.Sub(num1, num2);
+                        break;
+                    case "3":
+                        calc.Multy(num1, num2);
+                        break;
+                    case "4":
+                        if (num2 == 0)
+                        {
+                            throw new CalculatorDivideByZeroException();
+                            Console.WriteLine("Второе число 0. Делить на 0 нельзя!");
+                            return;
+                        }
+                        else
+                            calc.Divide(num1, num2);
+                        break;
+                    case " ":
+                        flag = false;
+                        break;
+                }
+                if (flag == false)
+                    break;
+            }
+        }
+
+        private static void Calc_MyEventHandler(object? sender, EventArgs e)
+        {
+            if (sender is Calc)
+                Console.WriteLine(((Calc)sender).Result);
+        }
+    }
+}
+
+
+
+
+Icalc.cs
+using System;
+
+namespace HW8
+{
+    public interface Icalc
+    {
+        double Result { get; set; }
+        void Sum(double x, double y);
+        void Sub(double x, double y);
+        void Multy(double x, double y);
+        void Divide(double x, double y);
+
+        event EventHandler<EventArgs> MyEventHandler;
+    }
+}
+
+
+
+
+Calc.cs
+using System;
+
+namespace HW8
+{
+
+    internal class Calc : Icalc
+    {
+        public double Result { get; set; } = 0D;
+
+        public event EventHandler<EventArgs> MyEventHandler;
+
+        private void PrintResult()
+        {
+            MyEventHandler?.Invoke(this, new EventArgs());
+        }
+
+        public void Sum(double x, double y)
+        {
+            Result = x + y;
+            Console.Write($"Результат: {x} + {y} = ");
+            PrintResult();
+        }
+
+        public void Sub(double x, double y)
+        {
+            Result = x - y;
+            Console.Write($"Результат: {x} - {y} = ");
+            PrintResult();
+        }
+
+        public void Multy(double x, double y)
+        {
+            Result = x * y;
+            Console.Write($"Результат: {x} * {y} = ");
+            PrintResult();
+        }
+        public void Divide(double x, double y)
+        {
+            Result = x / y;
+            Console.Write($"Результат: {x} / {y} = ");
+            PrintResult();
+        }
+
+        public void Sum(int x, int y)
+        {
+            Result = x + y;
+            Console.Write($"Результат: {x} + {y} = ");
+            PrintResult();
+        }
+
+        public void Sub(int x, int y)
+        {
+            Result = x - y;
+            Console.Write($"Результат: {x} - {y} = ");
+            PrintResult();
+        }
+
+        public void Multy(int x, int y)
+        {
+            Result = x * y;
+            Console.Write($"Результат: {x} * {y} = ");
+            PrintResult();
+        }
+        public void Divide(int x, int y)
+        {
+            Result = x / y;
+            Console.Write($"Результат: {x} / {y} = ");
+            PrintResult();
+        }
+
+    }
+}
+
+
+
+
+CalculatorException.cs
+using System;
+
+namespace HW8
+{
+    public class CalculatorException : Exception
+    {
+        public CalculatorException()
+        {
+
+        }
+        public CalculatorException(string error) : base(error)
+        {
+
+        }
+    }
+}
+
+
+
+
+CalculatorDivideByZeroException.cs
+using System;
+
+namespace HW8
+{
+    public class CalculatorDivideByZeroException : CalculatorException
+    {
+        public CalculatorDivideByZeroException()
+        {
+
+        }
+        public CalculatorDivideByZeroException(string error) : base(error)
+        {
+
+        }
+    }
+}
