@@ -69,7 +69,6 @@ namespace HW7
 
 Calc.cs
 using System;
-namespace HW7;
 
 internal class Calc: Icalc
 {
@@ -116,7 +115,6 @@ internal class Calc: Icalc
 
 Icalc.cs
 using System;
-namespace HW7;
 public interface Icalc
 {
     int Result { get; set; }
