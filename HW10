@@ -1,0 +1,57 @@
+using System.Text;
+
+namespace HW10
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            var mainPath = args[0];
+            var fileExtention = args[1];
+            var foundation = args[2];
+            FindFile(mainPath, fileExtention, foundation);
+        }
+
+
+
+
+
+        public static void FindFile(string mainPath, string fileExtention, string foundation)
+        {
+            var dirs = Directory.EnumerateDirectories(mainPath);
+            var files = Directory.EnumerateFiles(mainPath);
+            foreach (var file in files)
+            {
+                if (file.Contains("." + fileExtention))
+                {
+                    FindText(file, foundation);
+                    break;
+                }
+            }
+            foreach (var dir in dirs)
+            {
+                FindFile(dir, fileExtention, foundation);
+            }
+        }
+
+
+
+
+        public static void FindText(string file, string foundation)
+        {
+            using (StreamReader sr = new StreamReader(file))
+            {
+                while (!sr.EndOfStream)
+                {
+                    var value = sr.ReadLine();
+                    if (value.Contains(foundation))
+                    {
+                        Console.Write($"Искомый файл '{Path.GetFileName(file)}'. ");
+                        Console.WriteLine($"Искомое слово '{foundation}' в строке: {value}");
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
