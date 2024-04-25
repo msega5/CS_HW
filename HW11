@@ -1,0 +1,85 @@
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Data;
+using System.Xml.Serialization;
+using System.Text.Json;
+
+namespace HW11
+{
+    public class Weather
+    {
+        public string Time { get; set; }
+        public double Temperature { get; set; }
+        public int Weathercode { get; set; }
+        public double Windspeed { get; set; }
+        public int Winddirection { get; set; }
+    }
+    public class WeatherInfo
+    {
+        public Weather Current { get; set; }
+        public List<Weather> History { get; set; }
+    }
+
+    [XmlRoot("WeatherInfo")]
+    public class DataRoot
+    {
+        [XmlElement("Current")]
+        public DataEntry[] Actual;
+
+    }
+
+    [XmlType("DataEntry")]
+    public class DataEntry
+    {
+        [XmlElement("Time")]
+        public string Time;
+        [XmlElement("Temperature")]
+        public double TemperatureNum;
+        [XmlElement("Weathercode")]
+        public int WeathercodeNum;
+        [XmlElement("Windspeed")]
+        public double WindspeedNum;
+        [XmlElement("Winddirection")]
+        public int WinddirectionNum;
+    }
+
+
+
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            //Напишите приложение, конвертирующее произвольный JSON в XML
+            //string fileJson = """{"Current":{"Time":"2023-06-18T20:35:06.722127+04:00","Temperature":29,"Weathercode":1,"Windspeed":2.1,"Winddirection":1},"History":[{"Time":"2023-06-17T20:35:06.777017+04:00","Temperature":29,"Weathercode":2,"Windspeed":2.4,"Winddirection":1},{"Time":"2023-06-16T20:35:06.777081+04:00","Temperature":22,"Weathercode":2,"Windspeed":2.4,"Winddirection":1},{"Time":"2023-06-15T20:35:06.777082+04:00","Temperature":21,"Weathercode":4,"Windspeed":2.2,"Winddirection":1}]}""";
+            string fileJson = """{"Time":"2023-06-18T20:35:06.722127+04:00","Temperature":29,"Weathercode":1,"Windspeed":2.1,"Winddirection":1}""";
+            Weather? weather = JsonSerializer.Deserialize<Weather>(fileJson);
+            Console.WriteLine("Десериализация JSON:");
+            Console.WriteLine($"Date: {weather?.Time}");
+            Console.WriteLine($"Temperature: {weather?.Temperature}");
+            Console.WriteLine($"Weathercode: {weather?.Weathercode}");
+            Console.WriteLine($"Windspeed: {weather?.Windspeed}");
+            Console.WriteLine($"Winddirection: {weather?.Winddirection}");
+            Console.WriteLine();
+
+            string Time = weather.Time;
+            double TemperatureNum = weather.Temperature;
+            int WeathercodeNum = weather.Weathercode;
+            double WindspeedNum = weather.Windspeed;
+            int WinddirectionNum = weather.Winddirection;
+
+            Console.WriteLine("Cериализация в XML:");
+            DataRoot dataRoot = new DataRoot();
+            dataRoot.Actual = new DataEntry[1];
+            dataRoot.Actual[0] = new DataEntry();
+            dataRoot.Actual[0].Time = Time;
+            dataRoot.Actual[0].TemperatureNum = TemperatureNum;
+            dataRoot.Actual[0].WeathercodeNum = WeathercodeNum;
+            dataRoot.Actual[0].WindspeedNum = WindspeedNum;
+            dataRoot.Actual[0].WinddirectionNum = WinddirectionNum;
+
+            var serialize = new XmlSerializer(typeof(DataRoot));
+            serialize.Serialize(Console.Out, dataRoot);
+        }
+
+    }
+}
