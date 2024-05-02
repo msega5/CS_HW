@@ -13,13 +13,6 @@ namespace Seminar_12
             Server("Hello");
         }
 
-        public void Task1()
-        {
-            Message msg = new Message() { Text = "Hello", DateTime = DateTime.Now, NicknameFrom = "Artem", NicknameTo = "All" };
-            string json = msg.SerializeMessageToJson();
-            Message? msgDeserialized = Message.DeserializeFromJson(json);
-        }
-
         public static void Server(string name)
         {
             UdpClient udpClient = new UdpClient(12345);
