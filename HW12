@@ -20,22 +20,6 @@ namespace Seminar_12
             Message? msgDeserialized = Message.DeserializeFromJson(json);
         }
 
-
-        //public bool SentMessage(string message)
-        //{
-        //    using (Socket listner = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-        //    {
-        //        var remoteEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1234);
-        //        listner.Blocking = true;
-        //        listner.Bind(remoteEndpoint);
-        //        listner.Listen(100);
-        //        Console.WriteLine("wait");
-        //        var socket = listner.Accept();
-        //        Console.WriteLine("connected");
-        //        listner.Close();
-        //    }
-        //}
-
         public static void Server(string name)
         {
             UdpClient udpClient = new UdpClient(12345);
