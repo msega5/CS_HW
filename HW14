@@ -1,0 +1,162 @@
+SERVER
+================================================================================================================
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+
+namespace Seminar_12
+{
+    internal class Program
+    {
+        static async Task Main()
+        {
+            try
+            {
+                await Server("Hello", ct);
+            }
+            catch (TaskCanceledException _)
+            {
+                Console.WriteLine("Задача завершена");
+            }
+            finally
+            {
+                Console.WriteLine("Задача завершена");
+            }
+        }
+
+
+
+        static private CancellationTokenSource cts = new CancellationTokenSource();
+        static private CancellationToken ct = cts.Token;
+
+
+        static async Task Server(string name, CancellationToken ct)
+        {
+            UdpClient udpClient = new UdpClient(12345);
+            IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            Console.WriteLine("Server wait for msg");
+
+            while (!ct.IsCancellationRequested)
+            {
+                byte[] buffer = udpClient.Receive(ref iPEndPoint);
+                var messageText = Encoding.UTF8.GetString(buffer);
+
+                await Task.Run(() =>
+                {
+                    Message message = Message.DeserializeFromJson(messageText);
+                    message.Print();
+
+                    if (message.ToString().Contains("exit"))
+                    {
+                        byte[] reply = Encoding.UTF8.GetBytes("Shutdown server");
+                        udpClient.Send(reply, reply.Length, iPEndPoint);
+                        ct.ThrowIfCancellationRequested();                        
+                        cts.Cancel();
+                    }
+                    else
+                    {
+                        byte[] reply = Encoding.UTF8.GetBytes("Msg get");
+                        udpClient.Send(reply, reply.Length, iPEndPoint);
+                    }
+                });
+            }
+        }
+    }
+}
+
+
+
+SERVER Message class
+================================================================================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+namespace Seminar_12
+{
+    public class Message
+    {
+        public string? Text { get; set; }
+        public DateTime DateTime { get; set; }
+
+        public string? NicknameFrom { get; set; }
+
+        public string? NicknameTo { get; set; }
+
+        public string SerializeMessageToJson() => JsonSerializer.Serialize(this);
+
+        public static Message? DeserializeFromJson(string message) => JsonSerializer.Deserialize<Message>(message);
+
+        public void Print()
+        {
+            Console.WriteLine(ToString());
+        }
+
+        public override string ToString()
+        {
+            return $"{this.DateTime} получено сообщение {this.Text} от {this.NicknameFrom}";
+        }
+    }
+}
+
+
+
+
+CLIENT
+================================================================================================================
+using Seminar_12;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+
+namespace Seminar_12_Client
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            SentMessage(args[0], args[1]);
+        }
+
+
+        public static void SentMessage(string From, string ip)
+        {
+            UdpClient udpClient = new UdpClient();
+            IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ip), 12345);
+
+            while (true)
+            {
+                string messageText;
+                do
+                {
+                    Console.Clear();
+                    Console.WriteLine("Type 'exit' to shutdown or Enter msg:");
+                    messageText = Console.ReadLine();
+                    if (messageText == "exit")
+                    {
+                        Console.WriteLine("1125");
+                    }
+                }
+                while (string.IsNullOrEmpty(messageText));
+
+                ThreadPool.QueueUserWorkItem(obj =>
+                {
+                    Message message = new Message() { Text = messageText, NicknameFrom = From, NicknameTo = "Server", DateTime = DateTime.Now };
+                    string json = message.SerializeMessageToJson();
+
+                    byte[] data = Encoding.UTF8.GetBytes(json);
+                    udpClient.Send(data, data.Length, iPEndPoint);
+
+                    byte[] buffer = udpClient.Receive(ref iPEndPoint);
+                    var answer = Encoding.UTF8.GetString(buffer);
+                    Console.WriteLine(answer);
+
+                });
+            }
+        }
+    }
+}
