@@ -1,0 +1,223 @@
+Server.cs
+=====================================================================================
+using Seminar_15_patterns;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+
+namespace Seminar_15_patterns
+{
+
+    public enum TypeSend
+    {
+        ToAll,
+        ToOne,
+        defaultmes
+    }
+
+    public class Server
+    {
+        private readonly UdpClient _udpClient;
+        private IPEndPoint _iPEndPoint;
+        private Manager _manager;
+
+        public string Name { get => "Server-1"; }
+        public Dictionary<string, IPEndPoint> Users { get; set; }
+
+        public Server()
+        {
+            _udpClient = new UdpClient(12345);
+            _iPEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            _manager = new Manager(this);
+        }
+
+        public Message Listen()
+        {
+            byte[] buffer = _udpClient.Receive(ref _iPEndPoint);
+            var messageText = Encoding.UTF8.GetString(buffer);
+            Message message = Message.DeserializeFromJson(messageText);
+            return message;
+        }
+
+        public void Send(TypeSend type, Message message)
+        {
+            byte[] reply = Encoding.UTF8.GetBytes(message.SerializeMessageToJson());
+            switch (type)
+            {
+                case TypeSend.ToAll:
+                    foreach (var ip in Users.Values)
+                        _udpClient.Send(reply, reply.Length, _iPEndPoint); break;
+                case TypeSend.ToOne:
+                    if (Users.TryGetValue(message.NicknameTo, out IPEndPoint ep))
+                        _udpClient.Send(reply, reply.Length, ep); break;
+            }
+
+
+
+
+        }
+    }
+}
+
+
+
+Manager.cs (mediator)
+=====================================================================================
+using System;
+using System.Net;
+using static Seminar_15_patterns.Message;
+
+namespace Seminar_15_patterns
+{
+    public class Manager
+    {
+        private Server _server;
+
+        public TypeSend Execute(Message msg, IPEndPoint iPEndPoint)
+        {
+            switch (msg.command)
+            {
+                case Commands.Delete: Delete(msg.NicknameFrom); break;
+                case Commands.Register: Register(msg.NicknameFrom, iPEndPoint); break;
+                    default: return Send(msg);
+            }
+            return TypeSend.defaultmes;
+        }
+
+        public TypeSend Send(Message msg)
+        {
+            if (string.IsNullOrEmpty(msg.NicknameTo))
+                return TypeSend.ToAll;
+            return TypeSend.ToOne;
+        }
+
+        public void Register(string user, IPEndPoint iPEndPoint)
+        {
+            if (_server.Users == null)
+                _server.Users = new Dictionary<string, IPEndPoint>();
+            _server.Users.Add(user, iPEndPoint);
+            Console.WriteLine($"New {user} add");
+        }
+
+        public void Delete(string user)
+        {
+            _server.Users.Remove(user);
+            Console.WriteLine($"New {user} delete");
+        }
+    }
+}
+
+
+
+Message.cs
+=====================================================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+namespace Seminar_15_patterns
+{
+    public enum Commands
+    {
+        Register,
+        Delete
+    }
+
+    public class Message
+    {
+        public Commands command {  get; set; }
+        public string? Text { get; set; }
+        public DateTime DateTime { get; set; }
+
+        public string? NicknameFrom { get; set; }
+
+        public string? NicknameTo { get; set; }
+
+        public string SerializeMessageToJson() => JsonSerializer.Serialize(this);
+
+        public static Message? DeserializeFromJson(string message) => JsonSerializer.Deserialize<Message>(message);
+
+        public void Print()
+        {
+            Console.WriteLine(ToString());
+        }
+
+        public override string ToString()
+        {
+            return $"{this.DateTime} получено сообщение {this.Text} от {this.NicknameFrom}";
+        }
+    }
+}
+
+
+
+
+Program.cs
+=====================================================================================
+using System.Net.Sockets;
+using System.Net;
+using System.Text;
+
+namespace Seminar_15_patterns
+{
+    internal class Program
+    {
+
+        static UdpClient udpClient = new UdpClient();
+        static IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ip), 12345);
+
+        static void Main(string[] args)
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                SentMessage("Serg", i);
+            }
+            Console.ReadLine();
+        }
+
+
+        public static void SentMessage(string From, int i, string ip = "127.0.0.1")
+        {
+        }
+
+        public static void m1()
+        {
+            Message message = new Message() { Text = "Hello", NicknameFrom = "Serg", NicknameTo = "Server", DateTime = DateTime.Now, command = Commands.Register };
+            string json = message.SerializeMessageToJson();
+
+            byte[] data = Encoding.UTF8.GetBytes(json);
+            udpClient.Send(data, data.Length, iPEndPoint);
+        }
+
+        public static void m2()
+        {
+            Message message = new Message() { Text = "Hello", NicknameFrom = "Kate", NicknameTo = "Server", DateTime = DateTime.Now, command = Commands.Register };
+            string json = message.SerializeMessageToJson();
+
+            byte[] data = Encoding.UTF8.GetBytes(json);
+            udpClient.Send(data, data.Length, iPEndPoint);
+        }
+
+        public static void m3()
+        {
+            Message message = new Message() { Text = "Hello", NicknameFrom = "Kate", NicknameTo = "Serg", DateTime = DateTime.Now };
+            string json = message.SerializeMessageToJson();
+
+            byte[] data = Encoding.UTF8.GetBytes(json);
+            udpClient.Send(data, data.Length, iPEndPoint);
+        }
+
+        public static void m4()
+        {
+            Message message = new Message() { Text = "Hello", NicknameFrom = "Kate", NicknameTo = "Server", DateTime = DateTime.Now, command = Commands.Delete };
+            string json = message.SerializeMessageToJson();
+
+            byte[] data = Encoding.UTF8.GetBytes(json);
+            udpClient.Send(data, data.Length, iPEndPoint);
+        }
+    }
+}
